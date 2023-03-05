@@ -306,11 +306,32 @@ To remedy this you can opt to load the plugin from your `wp-config.php` file bef
 It's really simple to do this by adding the following snippet to your `wp-config.php` before the `/* That's all, stop editing! Happy blogging. */` comment:
 
 ```php
-// It's possible your WordPress installation is different, check to make sure this path is correct for your installation
-require_once __DIR__ . '/wp-content/plugins/wp-sentry-integration/wp-sentry.php';
+// It's possible your WordPress installation is different --
+// check to make sure the fallback path is correct for your installation.
+$wp_sentry_path = ( defined( 'WP_CONTENT_DIR' ) ) 
+	? WP_CONTENT_DIR . '/plugins/wp-sentry-integration/wp-sentry.php'
+	: __DIR__ . '/wp-content/plugins/wp-sentry-integration/wp-sentry.php';
+// Do not crash in case the plugin is not installed
+if ( file_exists( $wp_sentry_path ) ) {
+	require_once $wp_sentry_path;
+}
 ```
 
 Also make sure that any configuration options like `WP_SENTRY_PHP_DSN` are set before the snippet above otherwise they have no effect.
+
+Note that if you've installed the plugin directly via Composer with `composer require stayallive/wp-sentry`, its directory name will be `wp-sentry`, not `wp-sentry-integration`. So if that is the case, you'll need to update the `require`d paths. For example:
+
+```php
+// Before:
+// $wp_sentry_path = ( defined( 'WP_CONTENT_DIR' ) ) 
+// 	? WP_CONTENT_DIR . '/plugins/wp-sentry-integration/wp-sentry.php'
+// 	: __DIR__ . '/wp-content/plugins/wp-sentry-integration/wp-sentry.php';
+
+// After:
+$wp_sentry_path = ( defined( 'WP_CONTENT_DIR' ) ) 
+	? WP_CONTENT_DIR . '/plugins/wp-sentry/wp-sentry.php'
+	: __DIR__ . '/wp-content/plugins/wp-sentry/wp-sentry.php';
+```
 
 ### Capturing plugin errors
 
